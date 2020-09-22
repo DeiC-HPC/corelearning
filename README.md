@@ -52,6 +52,12 @@ docker container. `homedir` is the home directory of the user in the docker
 container. `websocket-host` is the hostname you want the websocket to respond
 to. `motd` is the message that will be shown in top of the terminal.
 
+### Docker image
+
+When creating a dockerfile for Corelearning, it should copy `server/term` into
+the container and make it executable. It should of course be placed somewhere in
+in the path of the user, for example `/usr/bin`.
+
 ### Hosting the web
 
 You will also need to host what is in the `html` folder. This can be done with
