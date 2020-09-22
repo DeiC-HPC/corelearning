@@ -17,7 +17,6 @@ client = docker.from_env()
 config = dict()
 with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.Loader)
-print(config)
 homedirlen = len(config["homedir"])
 textdir = os.listdir("text")
 textdir.sort()
@@ -27,7 +26,6 @@ for file in textdir:
     if os.path.isfile(filename):
         with open(filename) as f:
             text.append(misaka.html(f.read(), extensions=("fenced-code",)))
-print(text)
     
 def handle_command(message, containerkey):
     container = containers[containerkey]
@@ -35,15 +33,9 @@ def handle_command(message, containerkey):
     response = ""
     if message["type"] == "command":
         cmd = message["content"]
-        # TODO: maybe add logging?
-        logging.info("")
         
-        #print(f"< {cmd} {websocket.remote_address}")
         print(f"< {cmd} {containerpath[containerkey]}")
         (_, output) = container.exec_run(f"term {containerpath[containerkey]} {cmd}", user=config["user"])
-
-        # TODO: Remove print
-        print(output)
 
         response = output.decode("utf-8")
 
@@ -51,7 +43,6 @@ def handle_command(message, containerkey):
     elif message["type"] == "file":
         path = containerpath[containerkey]
         print(path)
-        #TODO: figure out a better way to find the user home directory
         if path[:homedirlen] == config["homedir"]:
             with tempfile.TemporaryDirectory() as tmp:
                 binstring = message["content"]
