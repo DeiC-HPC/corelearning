@@ -1,0 +1,145 @@
+@import '~jquery.terminal/css/jquery.terminal.min.css';
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+p {
+    padding: 4px;
+}
+
+#main {
+    font-family: "Source Code Pro";
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    position: absolute;
+    width: 75%;
+    height: 100%;
+}
+
+#learn {
+    font-family: "Source Sans Pro";
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    right: 0;
+    width:25%;
+    height: 100%;
+    float:right;
+    border-left: 1px solid #000;
+    padding: 10px;
+    /*padding-bottom: 2em;*/
+    position:absolute;
+    overflow: auto;
+}
+
+#learn .bottom-fix {
+    margin-bottom: 2.5em;
+}
+
+#buttons {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 1.5em;
+}
+
+.pagination {
+    border: none;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: inherit;
+}
+
+.terminal {
+    --background: #333;
+    --animation: terminal-bar;
+    padding: 10px;
+    --size:1.5;
+}
+
+code {
+    font-family: "Source Code Pro";
+    background: #ccc;
+    border: 1px solid #999;
+    border-radius: 4px;
+    color: #F33;
+    padding: 2px;
+}
+
+pre code {
+    display: block;
+    border: 1px #999 solid;
+    display: inline-block;
+    width: 100%;
+    white-space: pre;
+    overflow: auto;
+    margin-top: 5px;
+    padding: 2px;
+}
+
+#dropbox, #connection-problems, #welcome-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#dropbox #inner {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 2px 2px 5px #333;
+    position: absolute;
+    left: 30%;
+    top: 35%;
+    width: 40%;
+    text-align: center;
+    padding: 10px;
+    font-family: "Source Sans Pro";
+    font-size: 2em;
+}
+
+.blur {
+    filter: blur(2px);
+}
+
+.cloud {
+    font-size: 4em;
+    color: #4f9cff;
+}
+
+.hidden {
+    display: none;
+}
+
+#connection-problems div, #welcome-back div {
+    position: absolute;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 2px 2px 5px #333;
+    font-family: "Source Sans Pro";
+    width: 40%;
+    left: 30%;
+    text-align: center;
+    top: 20%;
+}
+
+#connection-problems div div {
+    padding: 20px;
+}
+
+.spinner {
+    animation: spin 3000ms infinite linear;
+    font-size: 10em;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

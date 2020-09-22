@@ -1,0 +1,4 @@
+websockets>=8.1
+docker>=4.2.2
+PyYAML>=5.3.0
+misaka>=2.1.0
