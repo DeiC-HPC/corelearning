@@ -1,6 +1,14 @@
 import './style.css'
 import * as $ from 'jquery';
 import 'jquery.terminal';
+declare var process : {
+    env: {
+      WEBSOCKETURL: string,
+      MOTD: string,
+    }
+  };
+
+  console.log(process.env);
 
 $(function() {
     let commands = [];
@@ -9,8 +17,7 @@ $(function() {
         window.localStorage.setItem("commands", JSON.stringify(commands));
     }
 
-    //const connectionAddr = "ws://hpc.rloewe.net:1337";
-    const connectionAddr = "ws://localhost:1337";
+    const connectionAddr = "ws://" + process.env.WEBSOCKETURL + ":1337";
 
     let path = "/home/user";
     let connection = {
@@ -26,7 +33,7 @@ $(function() {
         this.pause();
     },
     {
-        greetings: "Welcome to the SLURM learning terminal\nThe terminal is very limited and will only provide you with enough tools to help you learn how to use slurm.\nRunning time on the queue is also very limited as this is not the place to run your experiments.",
+        greetings: process.env.MOTD ? process.env.MOTD : "",
         prompt: function(callback) {
             callback("user@slurm-tutorial:" + path + "$ ");
         }

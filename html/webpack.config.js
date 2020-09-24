@@ -1,4 +1,8 @@
 const path = require('path');
+const fs = require('fs');
+const yaml = require('yaml');
+const webpack = require('webpack');
+const config = yaml.parse(fs.readFileSync("../../config.yaml", "utf-8"));
 
 module.exports = {
   entry: './src/index.ts',
@@ -23,4 +27,12 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      "process.env": {
+        "WEBSOCKETURL": JSON.stringify(config["websocket-host"]),
+        "MOTD": JSON.stringify(config["motd"]),
+      }
+    }),
+  ],
 };
