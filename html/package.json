@@ -2,7 +2,7 @@
     "private": "true",
     "dependencies": {
         "jquery": "^3.5.1",
-        "jquery.terminal": "^2.17.2",
+        "jquery.terminal": "^2.18.3",
         "yaml": "^1.10.0",
         "ts-loader": "^8.0.4"
     },
