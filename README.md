@@ -13,9 +13,8 @@ To use Corelearning, you simply add it to your project as a git submodule.
 
 Before we get started you should have the following programs installed:
 
-- Python3 (>=3.5 with pip)
+- Python3 (>=3.5 with pip and cffi)
 - Nodejs
-- Typescript
 - docker
 
 ### Installing
@@ -24,7 +23,8 @@ To install the needed libraries for the project you will have to run a few
 commands. Inside the html folder you run the command `npm install` and inside
 the server folder you run `pip3 install -r requirements.txt`.
 
-To compile the javascript for the webserver you will have to run `webpack` inside the html folder. `webpack` will be installed by `npm`.
+To compile the javascript for the webserver you will have to run `npm run build`
+inside the html folder.
 
 ### Files and folders
 
