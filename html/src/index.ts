@@ -166,21 +166,20 @@ $(function () {
     }
 
     function dragstart(this: HTMLElement, ev: DragEvent) {
-        console.log("dragstart", this, ev.target);
-        ev.preventDefault();
-        ev.stopPropagation();
-        addBlur();
+        if (ev.dataTransfer.types.includes("Files")) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            addBlur();
+        }
     }
 
     function dragstop(this: HTMLElement, ev: DragEvent) {
-        console.log("dragstop", this, ev.target);
         ev.preventDefault();
         ev.stopPropagation();
         removeBlur();
     }
 
     function dragstopanddrop(this: HTMLElement, ev: DragEvent) {
-        console.log("drop");
         ev.preventDefault();
         ev.stopPropagation();
         removeBlur();
@@ -208,8 +207,9 @@ $(function () {
     let body = document.body;
     let hover = document.getElementById("hover");
     body.addEventListener("dragenter", dragstart);
+    hover.addEventListener("drop", dragstopanddrop);
+    hover.addEventListener("dragover", function (ev: DragEvent) { ev.preventDefault(); });
     hover.addEventListener("dragleave", dragstop);
-    body.addEventListener("drop", dragstopanddrop);
 
     let storedCommands = window.localStorage.getItem("commands");
     if (storedCommands != null) {
