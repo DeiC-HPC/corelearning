@@ -11,7 +11,9 @@ import yaml
 import misaka
 import functools
 
-client = docker.from_env()
+# client = docker.from_env()
+url = "127.0.0.1:2375"
+client = docker.DockerClient(base_url=url)
 
 config = dict()
 with open("config.yaml") as f:
@@ -28,11 +30,12 @@ for file in textdir:
 
 class CoreContainer:
     def __init__(self, dockerimage, hostname, path, user, homedir):
-        self.__container = client.containers.run(dockerimage, hostname=hostname, detach=True)
+        self.__container = client.containers.run(dockerimage, command="/bin/bash", hostname=hostname, tty=True, stdin_open=True, detach=True, cpu_period=100000, cpu_quota=25000)
         self.__path = path
         self.__user = user
         self.__homedir = homedir
         self.__exec_cmd = functools.partial(self.__container.exec_run, user=self.__user)
+        self.__exec_cmd_root = functools.partial(self.__container.exec_run, user="root")
 
     async def run_command_in_container(self, cmd):
         loop = asyncio.get_running_loop()
@@ -42,6 +45,26 @@ class CoreContainer:
         self.__path = json.loads(response)["path"]
 
         return response
+
+    async def run_term(self, webclient):
+        loop = asyncio.get_running_loop()
+        if config["docker-startup-root-cmds"] and len(config["docker-startup-root-cmds"]) > 0:
+            for cmd in config["docker-startup-root-cmds"]:
+                await loop.run_in_executor(None, self.__exec_cmd_root, cmd)
+
+        async with websockets.connect(f"ws://{url}/containers/{self.__container.id}/attach/ws?stream=true&stdin=true&stdout=true&stderr=true") as server:
+            await server.send("clear\r")
+            while True:
+                try:
+                    message = await asyncio.wait_for(webclient.recv(), 0.01)
+                    await server.send(message)
+                except asyncio.TimeoutError:
+                    pass
+                try:
+                    message = await asyncio.wait_for(server.recv(), 0.01)
+                    await webclient.send(message)
+                except asyncio.TimeoutError:
+                    pass
 
     async def put_file_in_container(self, name, content):
         if self.__path.startswith(self.__homedir):
@@ -116,7 +139,37 @@ async def command(websocket, path):
         await corecontainer.kill_and_remove()
         print(f"Connection closed - time to clean up - {websocket.remote_address}")
 
-start_server = websockets.serve(command, config["websocket-host"], 1337, max_size=2**25)
+async def gettext(websocket):
+    try:
+        await websocket.send(json.dumps({"text": text}))
+    except websockets.ConnectionClosed:
+        pass
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+async def proxy(websocket):
+    (host, port) = (websocket.remote_address[0], websocket.remote_address[1])
+    containerkey = f"{host}:{port}"
+    corecontainer = CoreContainer(config["docker-image"], config["docker-hostname"], config["homedir"], config["user"], config["homedir"])
+    try:
+        await corecontainer.run_term(websocket)
+    except websockets.ConnectionClosed:
+        await corecontainer.kill_and_remove()
+        print(f"Connection closed - time to clean up - {websocket.remote_address}")
+
+# TODO: after changing to the new terminal, it is no longer possible to upload files to the container
+# The code is still there, but is not active
+# TODO: it is also no longer possible to get your session back after reconnecting
+async def router(websocket, path):
+    if path == "/proxy":
+        await proxy(websocket)
+    elif path == "/text":
+        await gettext(websocket)
+
+# start_server = websockets.serve(command, config["websocket-host"], 1337, max_size=2**25)
+
+async def main():
+    async with websockets.serve(router, config["websocket-host"], 1337, max_size=2**25):
+        await asyncio.Future()
+
+asyncio.run(main())
+# asyncio.get_event_loop().run_until_complete(start_server)
+# asyncio.get_event_loop().run_forever()

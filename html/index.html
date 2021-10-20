@@ -1,40 +1,46 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
-    </head>
-    <body>
+
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+        integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
+        crossorigin="anonymous" />
+</head>
+
+<body>
+    <div>
+        <div id="main">
+        </div>
+        <div id="learn">
+            <div id="buttons">
+                <span id="indicator">?/?</span>
+                <button id="prev" class="pagination"><i class="fas fa-angle-left"></i></button>
+                <button id="next" class="pagination"><i class="fas fa-angle-right"></i></button>
+            </div>
+        </div>
+    </div>
+    <div id="dropbox" class="hidden">
+        <div id="inner">
+            <p>Drop file anywhere to upload</p>
+            <i class="fas fa-cloud-upload-alt cloud"></i>
+        </div>
+    </div>
+    <div id="connection-problems" class="hidden">
         <div>
-            <div id="main">
-            </div>
-            <div id="learn">
-                <div id="buttons">
-                    <span id="indicator">?/?</span>
-                    <button id="prev" class="pagination"><i class="fas fa-angle-left"></i></button>
-                    <button id="next" class="pagination"><i class="fas fa-angle-right"></i></button>
-                </div>
-            </div>
+            <h1>Oh no! Your connection was lost</h1>
+            <p>Please wait while we reconnect you</p>
+            <div class=""><i class="fas fa-sync-alt spinner"></i></div>
         </div>
-        <div id="dropbox" class="hidden">
-            <div id="inner">
-                <p>Drop file anywhere to upload</p>
-                <i class="fas fa-cloud-upload-alt cloud"></i>
-            </div>
+    </div>
+    <div id="welcome-back" class="hidden">
+        <div>
+            <h1>Do you want to pick off from where you were?</h1>
+            <button id="yes">Yes</button><button id="no">No</button>
         </div>
-        <div id="connection-problems" class="hidden">
-            <div>
-                <h1>Oh no! Your connection was lost</h1>
-                <p>Please wait while we reconnect you</p>
-                <div class=""><i class="fas fa-sync-alt spinner"></i></div>
-            </div>
-        </div>
-        <div id="welcome-back" class="hidden">
-            <div>
-                <h1>Do you want to pick off from where you were?</h1>
-                <button id="yes">Yes</button><button id="no">No</button>
-            </div>
-        </div>
+    </div>
+    <div id="hover" class="hidden"></div>
     <script type="text/javascript" src="dist/bundle.js"></script>
-    </body>
+</body>
+
 </html>

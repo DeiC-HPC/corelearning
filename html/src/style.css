@@ -1,4 +1,5 @@
-@import '~jquery.terminal/css/jquery.terminal.min.css';
+/*@import '~jquery.terminal/css/jquery.terminal.min.css';*/
+@import '~xterm/css/xterm.css';
 
 * {
     padding: 0;
@@ -10,7 +11,7 @@ p {
 }
 
 #main {
-    font-family: "Source Code Pro";
+    /*font-family: "Source Code Pro";*/
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -56,7 +57,7 @@ p {
 .terminal {
     --background: #333;
     --animation: terminal-bar;
-    padding: 10px;
+    /* padding: 10px; */
     --size:1.5;
 }
 
@@ -99,6 +100,14 @@ pre code {
     padding: 10px;
     font-family: "Source Sans Pro";
     font-size: 2em;
+}
+
+#hover {
+    position: absolute;
+    z-index: 99;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
 }
 
 .blur {

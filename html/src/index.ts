@@ -1,6 +1,8 @@
-import './style.css'
-import * as $ from 'jquery';
-import 'jquery.terminal';
+import './style.css';
+import { Terminal } from 'xterm';
+import { AttachAddon } from 'xterm-addon-attach';
+import { FitAddon } from 'xterm-addon-fit';
+import { ReconnectAddon } from './reconnect-addon';
 declare var process: {
     env: {
         WEBSOCKETURL: string,
@@ -10,7 +12,102 @@ declare var process: {
 
 console.log(process.env);
 
-$(function () {
+const connectionAddr = "ws://" + process.env.WEBSOCKETURL + ":1337";
+const proxyAddr = connectionAddr + "/proxy";
+const textAddr = connectionAddr + "/text";
+const storageKey = "commands";
+let storedCommands = window.localStorage.getItem(storageKey);
+let commands: string[] = [];
+// TODO: Fix stored commands so they are sent to the server in case the user wants the same session again
+// This works in cooporation with the reconnect addon
+if (storedCommands != null) {
+    // document.getElementById("welcome-back").classList.remove("hidden");
+} else {
+    commands = JSON.parse(storedCommands);
+}
+
+let socket = new WebSocket(proxyAddr);
+let term = new Terminal();
+let attachAddon = new AttachAddon(socket);
+let fitAddon = new FitAddon();
+let reconnectAddon = new ReconnectAddon(storageKey, commands);
+term.loadAddon(reconnectAddon);
+term.loadAddon(fitAddon);
+term.open(document.getElementById("main"));
+fitAddon.fit();
+term.loadAddon(attachAddon);
+
+window.onresize = function () {
+    fitAddon.fit();
+};
+
+let maxpages = 1;
+
+function updatePagecount() {
+    document.getElementById("indicator").innerText = curpage + "/" + maxpages;
+}
+
+function updateMaxPages(num) {
+    maxpages = num;
+}
+
+let curpage = 1;
+function changePage(ev: MouseEvent, updateCounter: (value: number) => number, compare: (value: number) => boolean) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (compare(curpage)) {
+        let elm = document.querySelector("[data-page-index='" + curpage + "']");
+        if (elm) {
+            elm.classList.add("hidden");
+        }
+        curpage = updateCounter(curpage);
+        let newelm = document.querySelector("[data-page-index='" + curpage + "']");
+        if (newelm) {
+            newelm.classList.remove("hidden");
+        }
+    }
+    updatePagecount();
+}
+document.getElementById("prev").addEventListener("click", function (ev: MouseEvent) {
+    changePage(ev, (value: number) => value - 1, (value: number) => value > 1);
+});
+document.getElementById("next").addEventListener("click", function (ev: MouseEvent) {
+    changePage(ev, (value: number) => value + 1, (value: number) => value < maxpages);
+});
+
+document.getElementById("yes").addEventListener("click", function (ev: MouseEvent) {
+    commands = JSON.parse(storedCommands);
+    commands.forEach(c => socket.send(c));
+    document.getElementById("welcome-back").classList.add("hidden");
+});
+document.getElementById("no").addEventListener("click", function (ev: MouseEvent) {
+    window.localStorage.removeItem("commands");
+    document.getElementById("welcome-back").classList.add("hidden");
+});
+
+let textsocket = new WebSocket(textAddr);
+textsocket.onmessage = function (ev: MessageEvent) {
+    let data = JSON.parse(ev.data);
+    if (data.text) {
+        let learn = document.getElementById("learn");
+        data.text.forEach((text, index) => {
+            let element = document.createElement("div");
+            element.innerHTML = text;
+            element.classList.add("bottom-fix");
+            if (index != 0) {
+                element.classList.add("hidden")
+            }
+            element.dataset.pageIndex = index + 1;
+            learn.appendChild(element);
+        });
+        updateMaxPages(data.text.length);
+        updatePagecount();
+    }
+}
+
+// Most of the old code
+// TODO: contains code for uploading files to the server via drag and drop, we need that feature again
+/*$(function () {
     let commands = [];
     function saveCommand(command: any) {
         commands.push(command);
@@ -48,39 +145,6 @@ $(function () {
             }
         });
 
-    let maxpages = 1;
-
-    function updatePagecount() {
-        document.getElementById("indicator").innerText = curpage + "/" + maxpages;
-    }
-
-    function updateMaxPages(num) {
-        maxpages = num; //document.querySelectorAll("[data-page-index]").length;
-    }
-
-    let curpage = 1;
-    function changePage(ev: MouseEvent, updateCounter: (value: number) => number, compare: (value: number) => boolean) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        if (compare(curpage)) {
-            let elm = document.querySelector("[data-page-index='" + curpage + "']");
-            if (elm) {
-                elm.classList.add("hidden");
-            }
-            curpage = updateCounter(curpage);
-            let newelm = document.querySelector("[data-page-index='" + curpage + "']");
-            if (newelm) {
-                newelm.classList.remove("hidden");
-            }
-        }
-        updatePagecount();
-    }
-    document.getElementById("prev").addEventListener("click", function (ev: MouseEvent) {
-        changePage(ev, (value: number) => value - 1, (value: number) => value > 1);
-    });
-    document.getElementById("next").addEventListener("click", function (ev: MouseEvent) {
-        changePage(ev, (value: number) => value + 1, (value: number) => value < maxpages);
-    });
 
     function setupSocket(socket: WebSocket) {
         socket.onmessage = function (ev: MessageEvent) {
@@ -216,20 +280,4 @@ $(function () {
         document.getElementById("welcome-back").classList.remove("hidden");
     }
 
-    document.getElementById("yes").addEventListener("click", function (ev: MouseEvent) {
-        commands = JSON.parse(storedCommands);
-        connection.socket.send(
-            JSON.stringify(
-                {
-                    "type": "reconnection",
-                    "commands": commands
-                }
-            )
-        );
-        document.getElementById("welcome-back").classList.add("hidden");
-    });
-    document.getElementById("no").addEventListener("click", function (ev: MouseEvent) {
-        window.localStorage.removeItem("commands");
-        document.getElementById("welcome-back").classList.add("hidden");
-    });
-});
+});*/
