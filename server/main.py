@@ -11,13 +11,12 @@ import yaml
 import misaka
 import functools
 
-# client = docker.from_env()
-url = "127.0.0.1:2375"
-client = docker.DockerClient(base_url=url)
 
 config = dict()
 with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.Loader)
+url = config["docker-url"]
+client = docker.DockerClient(base_url=url)
 homedirlen = len(config["homedir"])
 textdir = os.listdir("text")
 textdir.sort()
@@ -163,8 +162,6 @@ async def router(websocket, path):
         await proxy(websocket)
     elif path == "/text":
         await gettext(websocket)
-
-# start_server = websockets.serve(command, config["websocket-host"], 1337, max_size=2**25)
 
 async def main():
     async with websockets.serve(router, config["websocket-host"], 1337, max_size=2**25):
