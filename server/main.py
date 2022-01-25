@@ -10,7 +10,7 @@ import logging
 import yaml
 import misaka
 import functools
-
+import requests
 
 config = dict()
 with open("config.yaml") as f:
@@ -25,27 +25,16 @@ for file in textdir:
     filename = f"text/{file}"
     if os.path.isfile(filename):
         with open(filename) as f:
-            text.append(misaka.html(f.read(), extensions=("fenced-code",)))
+            text.append(misaka.html(f.read(), extensions=("fenced-code", "tables")))
 
 class CoreContainer:
-    def __init__(self, dockerimage, hostname, path, user, homedir):
-        self.__container = client.containers.run(dockerimage, command="/bin/bash", hostname=hostname, tty=True, stdin_open=True, detach=True, cpu_period=100000, cpu_quota=25000)
+    def __init__(self, dockerimage: str, hostname: str, path, user, homedir):
+        self.__container = client.containers.run(dockerimage, command="/bin/bash", hostname=hostname, tty=True, stdin_open=True, detach=True, cpu_period=100000, cpu_quota=25000, environment=["TERM=xterm-256color"])
         self.__path = path
-        self.__user = user
         self.__homedir = homedir
-        self.__exec_cmd = functools.partial(self.__container.exec_run, user=self.__user)
         self.__exec_cmd_root = functools.partial(self.__container.exec_run, user="root")
 
-    async def run_command_in_container(self, cmd):
-        loop = asyncio.get_running_loop()
-        (_, output) = await loop.run_in_executor(None, self.__exec_cmd, f"term {self.__path} {cmd}")
-
-        response = output.decode("utf-8")
-        self.__path = json.loads(response)["path"]
-
-        return response
-
-    async def run_term(self, webclient):
+    async def run_term(self, webclient) -> None:
         loop = asyncio.get_running_loop()
         if config["docker-startup-root-cmds"] and len(config["docker-startup-root-cmds"]) > 0:
             for cmd in config["docker-startup-root-cmds"]:
@@ -56,7 +45,15 @@ class CoreContainer:
             while True:
                 try:
                     message = await asyncio.wait_for(webclient.recv(), 0.01)
-                    await server.send(message)
+                    command = await self.__get_json(message)
+                    if (message.startswith("{'") or message.startswith('{"')) and command != None:
+                        print(command)
+                        if command["type"] == "resize":
+                            await self.__resize_term(command["cols"], command["rows"])
+                        elif command["type"] == "file":
+                            await self.__put_file_in_container(command["name"], command["content"])
+                    else:
+                        await server.send(message)
                 except asyncio.TimeoutError:
                     pass
                 try:
@@ -65,7 +62,10 @@ class CoreContainer:
                 except asyncio.TimeoutError:
                     pass
 
-    async def put_file_in_container(self, name, content):
+    async def __resize_term(self, width: int, height: int) -> None:
+        requests.post(f"http://{url}/containers/{self.__container.id}/resize", params={"w": width, "h": height})
+
+    async def __put_file_in_container(self, name: str, content):
         if self.__path.startswith(self.__homedir):
             loop = asyncio.get_running_loop()
             with tempfile.TemporaryDirectory() as tmp:
@@ -90,53 +90,35 @@ class CoreContainer:
         await loop.run_in_executor(None,self.__container.kill)
         await loop.run_in_executor(None,self.__container.remove)
 
-    async def get_commands(self):
-        loop = asyncio.get_running_loop()
-        (_, output) = await loop.run_in_executor(None, self.__exec_cmd, "/bin/bash -c 'compgen -c'")
-        return json.dumps({ "commands": output.decode("utf-8").split() })
+    async def __get_json(self, text):
+        try:
+            return json.loads(text)
+        except:
+            return None
 
-    async def get_files(self):
-        loop = asyncio.get_running_loop()
-        (_, output) = await loop.run_in_executor(None, self.__exec_cmd, f"/bin/bash -c 'ls -a {self.__path}'")
-        return json.dumps({ "commands": output.decode("utf-8").split() })
-
-async def handle_command(message, container):
-    response = ""
-    if message["type"] == "command":
-        if message["content"]:
-            response = await container.run_command_in_container(message["content"])
-        else:
-            response = json.dumps({"status": "no command"})
-    elif message["type"] == "file":
-        response = await container.put_file_in_container(message["name"], message["content"])
-    elif message["type"] == "completion":
-        parts = message["content"].split()
-        if len(parts) == 1 and message["content"][-1] != " ":
-            response = await container.get_commands()
-        else:
-            response = await container.get_files()
-    elif message["type"] == "reconnection":
-        for command in message["commands"]:
-            await handle_command(command, container)
-        response = json.dumps({"status": "ok"})
-    else:
-        response = json.dumps({"status": "error", "message": "An unexpected error happened"})
-
-    return response
-
-async def command(websocket, path):
-    (host, port) = (websocket.remote_address[0], websocket.remote_address[1])
-    containerkey = f"{host}:{port}"
-    corecontainer = CoreContainer(config["docker-image"], config["docker-hostname"], config["homedir"], config["user"], config["homedir"])
-    try:
-        await websocket.send(json.dumps({"text": text}))
-        while True:
-            message = json.loads(await websocket.recv())
-            response = await handle_command(message, corecontainer)
-            await websocket.send(response)
-    except websockets.ConnectionClosed:
-        await corecontainer.kill_and_remove()
-        print(f"Connection closed - time to clean up - {websocket.remote_address}")
+#async def handle_command(message, container):
+#    response = ""
+#    if message["type"] == "command":
+#        if message["content"]:
+#            response = await container.run_command_in_container(message["content"])
+#        else:
+#            response = json.dumps({"status": "no command"})
+#    elif message["type"] == "file":
+#        response = await container.put_file_in_container(message["name"], message["content"])
+#    elif message["type"] == "completion":
+#        parts = message["content"].split()
+#        if len(parts) == 1 and message["content"][-1] != " ":
+#            response = await container.get_commands()
+#        else:
+#            response = await container.get_files()
+#    elif message["type"] == "reconnection":
+#        for command in message["commands"]:
+#            await handle_command(command, container)
+#        response = json.dumps({"status": "ok"})
+#    else:
+#        response = json.dumps({"status": "error", "message": "An unexpected error happened"})
+#
+#    return response
 
 async def gettext(websocket):
     try:
@@ -154,8 +136,7 @@ async def proxy(websocket):
         await corecontainer.kill_and_remove()
         print(f"Connection closed - time to clean up - {websocket.remote_address}")
 
-# TODO: after changing to the new terminal, it is no longer possible to upload files to the container
-# The code is still there, but is not active
+
 # TODO: it is also no longer possible to get your session back after reconnecting
 async def router(websocket, path):
     if path == "/proxy":
@@ -168,5 +149,3 @@ async def main():
         await asyncio.Future()
 
 asyncio.run(main())
-# asyncio.get_event_loop().run_until_complete(start_server)
-# asyncio.get_event_loop().run_forever()

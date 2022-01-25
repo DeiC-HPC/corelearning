@@ -10,6 +10,10 @@ p {
     padding: 4px;
 }
 
+li {
+    margin-left: 25px;
+}
+
 #main {
     /*font-family: "Source Code Pro";*/
     box-sizing: border-box;
@@ -18,6 +22,7 @@ p {
     position: absolute;
     width: 75%;
     height: 100%;
+    background-color: #000;
 }
 
 #learn {
@@ -71,10 +76,8 @@ code {
 }
 
 pre code {
-    display: block;
     border: 1px #999 solid;
-    display: inline-block;
-    width: 100%;
+    display: block;
     white-space: pre;
     overflow: auto;
     margin-top: 5px;
@@ -86,6 +89,7 @@ pre code {
     width: 100%;
     height: 100%;
     background: rgba(255, 255, 255, 0.3);
+    z-index: 4;
 }
 
 #dropbox #inner {
@@ -99,7 +103,11 @@ pre code {
     text-align: center;
     padding: 10px;
     font-family: "Source Sans Pro";
-    font-size: 2em;
+    font-size: 1em;
+}
+
+#dropbox #inner i {
+    font-size: 8em;
 }
 
 #hover {
