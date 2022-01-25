@@ -13,7 +13,7 @@ To use Corelearning, you simply add it to your project as a git submodule.
 
 Before we get started you should have the following programs installed:
 
-- Python3 (>=3.5 with pip and cffi)
+- Python3 (>=3.7 with pip and cffi)
 - Nodejs
 - docker
 
