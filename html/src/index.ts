@@ -67,7 +67,7 @@ function updateMaxPages(num) {
 }
 
 let curpage = 1;
-function changePage(ev: MouseEvent, updateCounter: (value: number) => number, compare: (value: number) => boolean) {
+function changePage(ev: Event, updateCounter: (value: number) => number, compare: (value: number) => boolean) {
     ev.preventDefault();
     ev.stopPropagation();
     if (compare(curpage)) {
@@ -89,6 +89,12 @@ document.getElementById("prev").addEventListener("click", function (ev: MouseEve
 document.getElementById("next").addEventListener("click", function (ev: MouseEvent) {
     changePage(ev, (value: number) => value + 1, (value: number) => value < maxpages);
 });
+document.getElementById("navigator").addEventListener("change", function (ev: Event) {
+    let target = ev.target as HTMLSelectElement;
+    let value = parseInt(target.value);
+    console.log('test', target.value);
+    changePage(ev, (_: number) => value, (_: number) => value > 0 && value < maxpages);
+});
 
 document.getElementById("yes").addEventListener("click", function (ev: MouseEvent) {
     commands = JSON.parse(storedCommands);
@@ -105,6 +111,7 @@ textsocket.onmessage = function (ev: MessageEvent) {
     let data = JSON.parse(ev.data);
     if (data.text) {
         let learn = document.getElementById("learn");
+        let navigator = document.getElementById("navigator");
         data.text.forEach((text, index) => {
             let element = document.createElement("div");
             element.innerHTML = text;
@@ -114,11 +121,16 @@ textsocket.onmessage = function (ev: MessageEvent) {
             }
             element.dataset.pageIndex = index + 1;
             learn.appendChild(element);
+            let option = document.createElement("option");
+            option.value = index + 1;
+            option.innerText = option.value.toString() + ": " + element.firstChild.textContent;
+            navigator.appendChild(option);
         });
         updateMaxPages(data.text.length);
         updatePagecount();
     }
-}
+};
+
 
 function addBlur() {
     document.getElementById("main").classList.add("blur");
