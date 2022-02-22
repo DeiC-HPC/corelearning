@@ -66,6 +66,11 @@ function updateMaxPages(num) {
     maxpages = num;
 }
 
+function updatePageSelector() {
+    let navigator = document.getElementById("navigator") as HTMLSelectElement;
+    navigator.value = curpage.toString();
+}
+
 let curpage = 1;
 function changePage(ev: Event, updateCounter: (value: number) => number, compare: (value: number) => boolean) {
     ev.preventDefault();
@@ -82,6 +87,7 @@ function changePage(ev: Event, updateCounter: (value: number) => number, compare
         }
     }
     updatePagecount();
+    updatePageSelector();
 }
 document.getElementById("prev").addEventListener("click", function (ev: MouseEvent) {
     changePage(ev, (value: number) => value - 1, (value: number) => value > 1);
