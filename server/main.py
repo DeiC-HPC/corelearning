@@ -12,6 +12,14 @@ import misaka
 import functools
 import requests
 
+logger = logging.getLogger("corelearning")
+handler = logging.FileHandler("corelearning.log")
+formatter = logging.Formatter("[%(asctime)s %(levelname)s] %(message)s")
+handler.setFormatter(formatter)
+handler.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
 config = dict()
 with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.Loader)
@@ -131,10 +139,11 @@ async def proxy(websocket):
     containerkey = f"{host}:{port}"
     corecontainer = CoreContainer(config["docker-image"], config["docker-hostname"], config["homedir"], config["user"], config["homedir"])
     try:
+        logger.info(f"User {containerkey} connected")
         await corecontainer.run_term(websocket)
     except websockets.ConnectionClosed:
         await corecontainer.kill_and_remove()
-        print(f"Connection closed - time to clean up - {websocket.remote_address}")
+        logger.info(f"User {containerkey} disconnected")
 
 
 # TODO: it is also no longer possible to get your session back after reconnecting
