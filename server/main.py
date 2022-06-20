@@ -49,7 +49,9 @@ class CoreContainer:
             for cmd in config["docker-startup-root-cmds"]:
                 await loop.run_in_executor(None, self.__exec_cmd_root, cmd)
 
-        async with websockets.connect(f"ws://{url}/containers/{self.__container.id}/attach/ws?stream=true&stdin=true&stdout=true&stderr=true") as server:
+        # detachKeys needs to be set to something the user will most likely not type in sequence
+        # Dockers default is ctrl-p,q, which then blocks ctrl-p functionality in the browser
+        async with websockets.connect(f"ws://{url}/containers/{self.__container.id}/attach/ws?detachKeys=ctrl-@,[&stream=true&stdin=true&stdout=true&stderr=true") as server:
             await server.send("clear\r")
             while True:
                 try:
