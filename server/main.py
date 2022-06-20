@@ -25,6 +25,7 @@ with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.Loader)
 url = config["docker-url"]
 client = docker.DockerClient(base_url=url)
+cpu_quota = int(config["cpu-quota"]*100000)
 homedirlen = len(config["homedir"])
 textdir = os.listdir("text")
 textdir.sort()
@@ -37,7 +38,7 @@ for file in textdir:
 
 class CoreContainer:
     def __init__(self, dockerimage: str, hostname: str, path, user, homedir):
-        self.__container = client.containers.run(dockerimage, command="/bin/bash", hostname=hostname, tty=True, stdin_open=True, detach=True, cpu_period=100000, cpu_quota=25000, environment=["TERM=xterm-256color"])
+        self.__container = client.containers.run(dockerimage, command="/bin/bash", hostname=hostname, tty=True, stdin_open=True, detach=True, cpu_period=100000, cpu_quota=cpu_quota, environment=["TERM=xterm-256color"])
         self.__path = path
         self.__homedir = homedir
         self.__exec_cmd_root = functools.partial(self.__container.exec_run, user="root")

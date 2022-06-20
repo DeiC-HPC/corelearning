@@ -41,16 +41,16 @@ docker-hostname: "the-hostname-you-want-the-container-to-have"
 user: docker-container-user
 homedir: /home/directory/of/the/docker/user
 websocket-host: "websocket.host"
-motd: |
-    This message will be shown in the top of the terminal
+cpu-quota: 0.25
 ```
 
-All fields, except `motd`, are required. `docker-image` is the image name for
-the docker image that you want to run. `docker-hostname` is the hostname you
-want the docker container to have. `user` is the username of the user in the
-docker container. `homedir` is the home directory of the user in the docker
-container. `websocket-host` is the hostname you want the websocket to respond
-to. `motd` is the message that will be shown in top of the terminal.
+All fields are required. `docker-image` is the image name for the docker image
+that you want to run. `docker-hostname` is the hostname you want the docker
+container to have. `user` is the username of the user in the docker container.
+`homedir` is the home directory of the user in the docker container.
+`websocket-host` is the hostname you want the websocket to respondto. `motd` is
+the message that will be shown in top of the terminal. `cpu-quota` is the
+allocated cpu ressources for a container. Here 0.25 means 25% of a core.
 
 ### Docker image
 
