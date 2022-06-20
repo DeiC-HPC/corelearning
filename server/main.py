@@ -52,7 +52,7 @@ class CoreContainer:
         # detachKeys needs to be set to something the user will most likely not type in sequence
         # Dockers default is ctrl-p,q, which then blocks ctrl-p functionality in the browser
         async with websockets.connect(f"ws://{url}/containers/{self.__container.id}/attach/ws?detachKeys=ctrl-@,[&stream=true&stdin=true&stdout=true&stderr=true") as server:
-            await server.send("clear\r")
+            await server.send(b'\x0c')
             while True:
                 try:
                     message = await asyncio.wait_for(webclient.recv(), 0.01)
