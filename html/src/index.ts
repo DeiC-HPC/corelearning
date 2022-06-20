@@ -5,8 +5,7 @@ import { FitAddon } from 'xterm-addon-fit';
 import { ReconnectAddon } from './reconnect-addon';
 declare var process: {
     env: {
-        WEBSOCKETURL: string,
-        MOTD: string,
+        WEBSOCKETURL: string
     }
 };
 
@@ -42,7 +41,6 @@ term.loadAddon(reconnectAddon);
 term.loadAddon(attachAddon);
 term.loadAddon(fitAddon);
 term.open(document.getElementById("main"));
-term.writeln(process.env.MOTD);
 fitAddon.fit();
 let cols = term.cols;
 let rows = term.rows;

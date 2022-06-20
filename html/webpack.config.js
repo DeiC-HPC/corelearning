@@ -21,7 +21,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ],
+    extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
     filename: 'bundle.js',
@@ -30,8 +30,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       "process.env": {
-        "WEBSOCKETURL": JSON.stringify(config["websocket-host"]),
-        "MOTD": JSON.stringify(config["motd"]),
+        "WEBSOCKETURL": JSON.stringify(config["websocket-host"])
       }
     }),
   ],
