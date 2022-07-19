@@ -97,7 +97,7 @@ document.getElementById("navigator").addEventListener("change", function (ev: Ev
     let target = ev.target as HTMLSelectElement;
     let value = parseInt(target.value);
     console.log('test', target.value);
-    changePage(ev, (_: number) => value, (_: number) => value > 0 && value < maxpages);
+    changePage(ev, (_: number) => value, (_: number) => value > 0 && value <= maxpages);
 });
 
 document.getElementById("yes").addEventListener("click", function (ev: MouseEvent) {
