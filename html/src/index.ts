@@ -132,6 +132,18 @@ textsocket.onmessage = function (ev: MessageEvent) {
         });
         updateMaxPages(data.text.length);
         updatePagecount();
+
+        document.querySelectorAll(".language-answer").forEach((element: HTMLElement) => {
+            element.classList.add("hidden");
+            console.log(element);
+            let btn = document.createElement("button");
+            btn.innerText = "Show answer";
+            btn.onclick = (ev: MouseEvent) => {
+                element.classList.remove("hidden");
+                btn.remove();
+            };
+            element.parentNode.parentNode.appendChild(btn);
+        });
     }
 };
 
