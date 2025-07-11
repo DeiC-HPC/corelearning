@@ -150,7 +150,8 @@ async def proxy(websocket):
 
 
 # TODO: it is also no longer possible to get your session back after reconnecting
-async def router(websocket, path):
+async def router(websocket):
+    path = websocket.request.path
     if path == "/proxy":
         await proxy(websocket)
     elif path == "/text":
